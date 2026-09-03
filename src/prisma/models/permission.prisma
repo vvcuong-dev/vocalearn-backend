@@ -1,0 +1,15 @@
+model Permission {
+    id       Int     @id @default(autoincrement())
+    name     String
+    code     String  @unique
+    group    String?
+    isSystem Boolean @default(false) @map("is_system")
+
+    roles RolePermission[]
+
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    @@index([group])
+    @@map("permissions")
+}

@@ -1,0 +1,6 @@
+enum UserStatus {
+  ACTIVE
+  PENDING
+  INACTIVE
+  BANNED
+}
