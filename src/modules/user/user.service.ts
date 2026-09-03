@@ -125,7 +125,7 @@ export class UserService {
         name: dto.name,
         email: dto.email,
         password: await hashPassword(dto.password),
-        status: dto.status ?? UserStatus.PENDING,
+        status: dto.status ?? UserStatus.ACTIVE,
         avatar: dto.avatar,
         phone: dto.phone,
       },

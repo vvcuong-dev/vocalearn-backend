@@ -1,11 +1,11 @@
-model User {
-    id             Int        @id @default(autoincrement())
+model Admin {
+    id             Int         @id @default(autoincrement())
     name           String
-    email          String     @unique
+    email          String      @unique
     password       String
-    status         UserStatus @default(ACTIVE)
+    status         AdminStatus @default(ACTIVE)
     avatar         String?
-    avatarPublicId String?    @map("avatar_public_id")
+    avatarPublicId String?     @map("avatar_public_id")
     phone          String?
 
     roleId Int?  @map("role_id")
@@ -17,5 +17,5 @@ model User {
     deletedAt DateTime? @map("deleted_at") @db.Timestamp
 
     @@index([roleId])
-    @@map("users")
+    @@map("admins")
 }

@@ -46,10 +46,10 @@ export class CreateUserDto {
   )
   password!: string;
 
-  @ApiPropertyOptional({ enum: UserStatus, default: UserStatus.PENDING })
+  @ApiPropertyOptional({ enum: UserStatus, default: UserStatus.ACTIVE })
   @IsOptional()
   @IsEnum(UserStatus, { message: VOCALEARN_ERROR_CODES.USER.STATUS_INVALID })
-  status?: UserStatus = UserStatus.PENDING;
+  status?: UserStatus = UserStatus.ACTIVE;
 
   @ApiPropertyOptional({ example: 'https://res.cloudinary.com/.../avatar.jpg' })
   @IsUrl({}, { message: VOCALEARN_ERROR_CODES.USER.AVATAR_INVALID })
