@@ -1,6 +1,9 @@
 import { Module } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { AuthController } from './auth.controller';
+import { AdminAuthService } from './admin-auth.service';
+import { UserAuthService } from './user-auth.service';
+import { AdminAuthController } from './admin-auth.controller';
+import { UserAuthController } from './user-auth.controller';
+import { AdminRepository } from './repositories/admin.repository';
 import { TokenModule } from '../token/token.module';
 import { PassportModule } from '@nestjs/passport';
 import { UserModule } from '../user/user.module';
@@ -9,8 +12,8 @@ import { RedisModule } from '../redis/redis.module';
 import { MailModule } from '../mail/mail.module';
 
 @Module({
-  controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
+  controllers: [AdminAuthController, UserAuthController],
+  providers: [AdminAuthService, UserAuthService, AdminRepository, JwtStrategy],
   imports: [PassportModule, TokenModule, UserModule, RedisModule, MailModule],
   exports: [JwtStrategy],
 })
