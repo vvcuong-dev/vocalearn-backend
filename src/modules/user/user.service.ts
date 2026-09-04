@@ -1,12 +1,10 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { UserRepository } from './repositories/user.repository';
 import { UpdateProfileDto } from './dto/update-user.dto';
 import { VOCALEARN_ERROR_CODES } from '../../constants/error-code.constant';
 import { AppException } from '../../common/exceptions/app.exception';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { CLOUDINARY_FOLDERS } from '../../constants/cloudinary.constant';
-import { Logger } from '@nestjs/common';
-import { User, UserStatus, Prisma } from '../../generated/prisma/browser';
 import { UserResponse } from './responses/user.response';
 import { QueryUserDto } from './dto/query-user.dto';
 import {
@@ -15,27 +13,34 @@ import {
 } from '../../common/responses/paginated.response';
 import { AdminUpdateUserDto } from './dto/admin-update-user.dto';
 import { hashPassword } from '../../utils/password.util';
+import { Prisma, User, UserStatus } from '../../generated/prisma/client';
 
 @Injectable()
 export class UserService {
   private readonly logger = new Logger(UserService.name);
+
   constructor(
-    private readonly prisma: PrismaService,
+    private readonly userRepository: UserRepository,
     private readonly cloudinaryService: CloudinaryService,
   ) {}
 
+  async getProfile(userId: number): Promise<UserResponse> {
+    const user = await this.userRepository.findById(userId);
+    if (!user) {
+      throw new AppException(
+        VOCALEARN_ERROR_CODES.USER.USER_NOT_FOUND,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    return new UserResponse(user);
+  }
+
   async findById(id: number): Promise<User | null> {
-    const user = await this.prisma.user.findUnique({
-      where: { id },
-    });
-    return user;
+    return this.userRepository.findById(id);
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    const user = await this.prisma.user.findUnique({
-      where: { email },
-    });
-    return user;
+    return this.userRepository.findByEmail(email);
   }
 
   private buildWhereClause(query: QueryUserDto): Prisma.UserWhereInput {
@@ -69,8 +74,8 @@ export class UserService {
     const limit = query.limit ?? 10;
 
     const [totalRecord, users] = await Promise.all([
-      this.prisma.user.count({ where }),
-      this.prisma.user.findMany({
+      this.userRepository.count(where),
+      this.userRepository.findAll({
         where,
         orderBy: { createdAt: 'desc' },
         skip: (page - 1) * limit,
@@ -87,17 +92,13 @@ export class UserService {
   }
 
   async findOne(id: number): Promise<UserResponse> {
-    const user = await this.prisma.user.findFirst({
-      where: { id, deleted: false },
-    });
-
+    const user = await this.userRepository.findOne({ id, deleted: false });
     if (!user) {
       throw new AppException(
         VOCALEARN_ERROR_CODES.USER.USER_NOT_FOUND,
         HttpStatus.NOT_FOUND,
       );
     }
-
     return new UserResponse(user);
   }
 
@@ -109,10 +110,7 @@ export class UserService {
     avatar?: string;
     phone?: string;
   }): Promise<UserResponse> {
-    const existed = await this.prisma.user.findUnique({
-      where: { email: dto.email },
-    });
-
+    const existed = await this.userRepository.findByEmail(dto.email);
     if (existed) {
       throw new AppException(
         VOCALEARN_ERROR_CODES.USER.EMAIL_ALREADY_EXISTS,
@@ -120,25 +118,20 @@ export class UserService {
       );
     }
 
-    const created = await this.prisma.user.create({
-      data: {
-        name: dto.name,
-        email: dto.email,
-        password: await hashPassword(dto.password),
-        status: dto.status ?? UserStatus.ACTIVE,
-        avatar: dto.avatar,
-        phone: dto.phone,
-      },
+    const created = await this.userRepository.create({
+      name: dto.name,
+      email: dto.email,
+      password: await hashPassword(dto.password),
+      status: UserStatus.ACTIVE,
+      avatar: dto.avatar,
+      phone: dto.phone,
     });
 
     return new UserResponse(created);
   }
 
   async update(id: number, dto: AdminUpdateUserDto): Promise<UserResponse> {
-    const user = await this.prisma.user.findFirst({
-      where: { id, deleted: false },
-    });
-
+    const user = await this.userRepository.findOne({ id, deleted: false });
     if (!user) {
       throw new AppException(
         VOCALEARN_ERROR_CODES.USER.USER_NOT_FOUND,
@@ -147,9 +140,7 @@ export class UserService {
     }
 
     if (dto.email && dto.email !== user.email) {
-      const existed = await this.prisma.user.findUnique({
-        where: { email: dto.email },
-      });
+      const existed = await this.userRepository.findByEmail(dto.email);
       if (existed) {
         throw new AppException(
           VOCALEARN_ERROR_CODES.USER.EMAIL_ALREADY_EXISTS,
@@ -159,34 +150,30 @@ export class UserService {
     }
 
     const { password, ...rest } = dto;
-    const updated = await this.prisma.user.update({
-      where: { id },
-      data: {
-        ...rest,
-        ...(password ? { password: await hashPassword(password) } : {}),
-      },
+    const updated = await this.userRepository.update(id, {
+      ...rest,
+      ...(password ? { password: await hashPassword(password) } : {}),
     });
 
-    return new UserResponse(updated);
-  }
-
-  async remove(id: number): Promise<boolean> {
-    const user = await this.prisma.user.findFirst({
-      where: { id, deleted: false },
-    });
-
-    if (!user) {
+    if (!updated) {
       throw new AppException(
         VOCALEARN_ERROR_CODES.USER.USER_NOT_FOUND,
         HttpStatus.NOT_FOUND,
       );
     }
 
-    await this.prisma.user.update({
-      where: { id },
-      data: { deleted: true },
-    });
+    return new UserResponse(updated);
+  }
 
+  async remove(id: number): Promise<boolean> {
+    const user = await this.userRepository.findOne({ id, deleted: false });
+    if (!user) {
+      throw new AppException(
+        VOCALEARN_ERROR_CODES.USER.USER_NOT_FOUND,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    await this.userRepository.update(id, { deleted: true });
     return true;
   }
 
@@ -194,19 +181,21 @@ export class UserService {
     userId: number,
     dto: UpdateProfileDto,
   ): Promise<UserResponse> {
-    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    const user = await this.userRepository.findById(userId);
     if (!user) {
       throw new AppException(
         VOCALEARN_ERROR_CODES.USER.USER_NOT_FOUND,
         HttpStatus.NOT_FOUND,
       );
     }
+    const updatedUser = await this.userRepository.update(userId, dto);
 
-    const updatedUser = await this.prisma.user.update({
-      where: { id: userId },
-      data: dto,
-    });
-
+    if (!updatedUser) {
+      throw new AppException(
+        VOCALEARN_ERROR_CODES.USER.USER_NOT_FOUND,
+        HttpStatus.NOT_FOUND,
+      );
+    }
     return new UserResponse(updatedUser);
   }
 
@@ -214,7 +203,7 @@ export class UserService {
     userId: number,
     file: Express.Multer.File,
   ): Promise<UserResponse> {
-    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    const user = await this.userRepository.findById(userId);
     if (!user) {
       throw new AppException(
         VOCALEARN_ERROR_CODES.USER.USER_NOT_FOUND,
@@ -226,14 +215,17 @@ export class UserService {
       file,
       CLOUDINARY_FOLDERS.AVATARS,
     );
-
-    const upload = await this.prisma.user.update({
-      where: { id: userId },
-      data: {
-        avatar: uploaded.secure_url,
-        avatarPublicId: uploaded.public_id,
-      },
+    const upload = await this.userRepository.update(userId, {
+      avatar: uploaded.secure_url,
+      avatarPublicId: uploaded.public_id,
     });
+
+    if (!upload) {
+      throw new AppException(
+        VOCALEARN_ERROR_CODES.USER.USER_NOT_FOUND,
+        HttpStatus.NOT_FOUND,
+      );
+    }
 
     if (user.avatarPublicId) {
       await this.cloudinaryService

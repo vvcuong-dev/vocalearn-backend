@@ -1,7 +1,6 @@
 import {
   IsOptional,
   IsPhoneNumber,
-  IsUrl,
   MaxLength,
   MinLength,
 } from 'class-validator';
@@ -20,9 +19,4 @@ export class UpdateProfileDto {
   @IsOptional()
   @IsPhoneNumber('VN', { message: VOCALEARN_ERROR_CODES.USER.PHONE_INVALID })
   phone?: string;
-
-  @ApiPropertyOptional({ example: 'https://res.cloudinary.com/.../avatar.jpg' })
-  @IsOptional()
-  @IsUrl({}, { message: VOCALEARN_ERROR_CODES.USER.AVATAR_INVALID })
-  avatar?: string;
 }

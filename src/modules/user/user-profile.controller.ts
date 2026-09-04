@@ -41,7 +41,7 @@ export class UserProfileController {
   @ApiOperation({ summary: 'Get the profile of the authenticated user' })
   @ApiResponse({ status: 200, type: UserResponse })
   getMe(@Req() req: RequestWithUser) {
-    return req.user;
+    return this.userService.getProfile(req.user.id);
   }
 
   @Patch()
