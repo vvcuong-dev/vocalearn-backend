@@ -1,6 +1,6 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import * as crypto from 'crypto';
-import { AdminRepository } from './repositories/admin.repository';
+import { AdminRepository } from '../admin/repositories/admin.repository';
 import { VOCALEARN_ERROR_CODES } from '../../constants/error-code.constant';
 import { comparePassword, hashPassword } from '../../utils/password.util';
 import { TokenService } from '../token/token.service';

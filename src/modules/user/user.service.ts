@@ -210,37 +210,6 @@ export class UserService {
     return new UserResponse(updatedUser);
   }
 
-  async assignRole(id: number, roleId: number): Promise<UserResponse> {
-    const user = await this.prisma.user.findFirst({
-      where: { id, deleted: false },
-    });
-
-    if (!user) {
-      throw new AppException(
-        VOCALEARN_ERROR_CODES.USER.USER_NOT_FOUND,
-        HttpStatus.NOT_FOUND,
-      );
-    }
-
-    const role = await this.prisma.role.findFirst({
-      where: { id: roleId, deleted: false },
-    });
-
-    if (!role) {
-      throw new AppException(
-        VOCALEARN_ERROR_CODES.ROLE.ROLE_NOT_FOUND,
-        HttpStatus.NOT_FOUND,
-      );
-    }
-
-    const updated = await this.prisma.user.update({
-      where: { id },
-      data: { roleId },
-    });
-
-    return new UserResponse(updated);
-  }
-
   async updateAvatar(
     userId: number,
     file: Express.Multer.File,

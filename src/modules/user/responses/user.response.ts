@@ -30,13 +30,6 @@ export class UserResponse {
   })
   phone!: string | null;
 
-  @ApiProperty({
-    example: 1,
-    nullable: true,
-    description: 'The role ID of the user',
-  })
-  roleId!: number | null;
-
   constructor(user: User) {
     this.id = user.id;
     this.name = user.name;
@@ -44,6 +37,5 @@ export class UserResponse {
     this.status = user.status;
     this.avatar = user.avatar;
     this.phone = user.phone;
-    this.roleId = user.roleId;
   }
 }

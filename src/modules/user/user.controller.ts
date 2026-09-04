@@ -37,7 +37,6 @@ import { PaginatedResponse } from '../../common/responses/paginated.response';
 import { PermissionsGuard } from '../../common/guards/permissions.guard';
 import { PERMISSIONS } from '../../constants/permission.constant';
 import { RequirePermissions } from '../../common/decorators/require-permissions.decorator';
-import { AssignRoleDto } from './dto/assign-role.dto';
 
 @ApiTags('Users')
 @ApiBearerAuth()
@@ -151,16 +150,6 @@ export class UserController {
     @Body() dto: AdminUpdateUserDto,
   ) {
     return this.userService.update(id, dto);
-  }
-
-  @Patch(':id/role')
-  @RequirePermissions([PERMISSIONS.USER.UPDATE])
-  @ApiOperation({ summary: 'Assign role to a user' })
-  assignRole(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() dto: AssignRoleDto,
-  ) {
-    return this.userService.assignRole(id, dto.roleId);
   }
 
   @Delete(':id')

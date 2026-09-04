@@ -5,12 +5,12 @@ import { HttpStatus } from '@nestjs/common';
 
 import { RedisService } from '../../modules/redis/redis.service';
 import { UserService } from '../../modules/user/user.service';
-import { AdminRepository } from '../../modules/auth/repositories/admin.repository';
+import { AdminRepository } from '../../modules/admin/repositories/admin.repository';
 import { jwtConfig } from '../../configs/jwt.config';
 import { UserStatus, AdminStatus } from '../../generated/prisma/enums';
 import { AuthUser } from '../types/auth-user.type';
 import { JwtPayload, AuthRole } from '../../modules/auth/type/jwt-payload.type';
-import { ActorType } from '../../constants/actor-type.constant'; // đổi tên từ role.constant/UserRole như đã bàn ở câu trước
+import { ActorType } from '../../constants/actor-type.constant';
 import { CACHE } from '../../constants/cache.constant';
 import { AppException } from '../exceptions/app.exception';
 import { VOCALEARN_ERROR_CODES } from '../../constants/error-code.constant';
@@ -62,7 +62,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         id: admin.id,
         email: admin.email,
         status: admin.status,
-        roleId: admin.roleId,
         actorType: ActorType.ADMIN,
       };
     }
@@ -78,7 +77,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       id: user.id,
       email: user.email,
       status: user.status,
-      roleId: user.roleId,
       actorType: ActorType.USER,
     };
   }

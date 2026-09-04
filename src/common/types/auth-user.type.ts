@@ -5,6 +5,7 @@ export interface AuthUser {
   id: number;
   email: string;
   status: UserStatus;
-  roleId: number | null;
+  roleId?: number | null;
   actorType: ActorType;
+  avatar?: string | null;
 }

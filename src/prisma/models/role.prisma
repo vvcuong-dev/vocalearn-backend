@@ -3,16 +3,15 @@ model Role {
     name        String
     code        String  @unique
     description String?
-    isSystem    Boolean @default(false) @map("is_system") // role hệ thống, không cho xoá/sửa
+    isSystem    Boolean @default(false) @map("is_system")
     isActive    Boolean @default(true) @map("is_active")
 
-    users       User[]
     permissions RolePermission[]
+    admins      Admin[]
 
     createdAt DateTime @default(now()) @map("created_at")
     updatedAt DateTime @updatedAt @map("updated_at")
     deleted   Boolean  @default(false)
-    admins    Admin[]
 
     @@map("roles")
 }

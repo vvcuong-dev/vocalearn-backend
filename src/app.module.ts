@@ -14,6 +14,7 @@ import { RoleModule } from './modules/role/role.module';
 import { MailModule } from './modules/mail/mail.module';
 import { redisConfig } from './configs/redis.config';
 import { BullModule } from '@nestjs/bullmq';
+import { AdminModule } from './modules/admin/admin.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { BullModule } from '@nestjs/bullmq';
     PermissionModule,
     RoleModule,
     MailModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService],

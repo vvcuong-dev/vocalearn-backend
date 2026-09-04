@@ -8,14 +8,10 @@ model User {
     avatarPublicId String?    @map("avatar_public_id")
     phone          String?
 
-    roleId Int?  @map("role_id")
-    role   Role? @relation(fields: [roleId], references: [id])
-
     createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp
     updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamp()
     deleted   Boolean   @default(false)
     deletedAt DateTime? @map("deleted_at") @db.Timestamp
 
-    @@index([roleId])
     @@map("users")
 }
