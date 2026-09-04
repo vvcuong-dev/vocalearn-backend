@@ -1,4 +1,3 @@
-// src/common/guards/permissions.guard.ts
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import {
@@ -26,7 +25,7 @@ export class PermissionsGuard implements CanActivate {
     );
 
     if (!requiredPermissions || requiredPermissions.length === 0) {
-      return true; // route không gắn @RequirePermissions -> bỏ qua
+      return true;
     }
 
     const operator =
