@@ -85,7 +85,7 @@ export abstract class BaseRepository<
     try {
       return await this.delegate.update({
         where: { id },
-        data: { deletedAt: new Date() },
+        data: { deletedAt: new Date(), deleted: true },
       });
     } catch (err) {
       this.handlePrismaError(err);
@@ -99,7 +99,7 @@ export abstract class BaseRepository<
   async bulkDelete(where: Record<string, any>): Promise<{ count: number }> {
     return await this.delegate.updateMany({
       where,
-      data: { deletedAt: new Date() },
+      data: { deletedAt: new Date(), deleted: true },
     });
   }
 

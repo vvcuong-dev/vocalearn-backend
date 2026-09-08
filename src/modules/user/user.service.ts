@@ -173,7 +173,7 @@ export class UserService {
         HttpStatus.NOT_FOUND,
       );
     }
-    await this.userRepository.update(id, { deleted: true });
+    await this.userRepository.deleteById(id);
     return true;
   }
 
