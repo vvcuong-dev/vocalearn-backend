@@ -14,10 +14,19 @@ const adapter = new PrismaMariaDb({
 const prisma = new PrismaClient({ adapter });
 
 const PERMISSIONS_SEED = [
+  // USER
   { code: 'USER_LIST', name: 'Xem danh sách user', group: 'USER' },
   { code: 'USER_CREATE', name: 'Tạo user', group: 'USER' },
   { code: 'USER_UPDATE', name: 'Sửa user', group: 'USER' },
   { code: 'USER_DELETE', name: 'Xoá user', group: 'USER' },
+
+  // CATEGORY
+  { code: 'CATEGORY_LIST', name: 'Xem danh sách category', group: 'CATEGORY' },
+  { code: 'CATEGORY_CREATE', name: 'Tạo category', group: 'CATEGORY' },
+  { code: 'CATEGORY_UPDATE', name: 'Sửa category', group: 'CATEGORY' },
+  { code: 'CATEGORY_DELETE', name: 'Xoá category', group: 'CATEGORY' },
+
+  // ROLE
 
   { code: 'ROLE_LIST', name: 'Xem danh sách role', group: 'ROLE' },
   { code: 'ROLE_CREATE', name: 'Tạo role', group: 'ROLE' },

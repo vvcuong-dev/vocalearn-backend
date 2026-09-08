@@ -1,0 +1,14 @@
+model Category {
+    id          Int     @id @default(autoincrement())
+    name        String
+    description String?
+    slug        String  @unique
+    order       Int     @default(0)
+
+    createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp
+    updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamp()
+    deleted   Boolean   @default(false)
+    deletedAt DateTime? @map("deleted_at") @db.Timestamp
+
+    @@map("categories")
+}
