@@ -16,6 +16,7 @@ import { redisConfig } from './configs/redis.config';
 import { BullModule } from '@nestjs/bullmq';
 import { AdminModule } from './modules/admin/admin.module';
 import { CategoryModule } from './modules/category/category.module';
+import { LearningPathModule } from './modules/learning-path/learning-path.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { CategoryModule } from './modules/category/category.module';
     MailModule,
     AdminModule,
     CategoryModule,
+    LearningPathModule,
   ],
   controllers: [AppController],
   providers: [AppService],

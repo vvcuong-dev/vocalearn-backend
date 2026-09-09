@@ -8,5 +8,6 @@ import { PermissionModule } from '../permission/permission.module';
   controllers: [CategoryController],
   providers: [CategoryService, CategoryRepository],
   imports: [PermissionModule],
+  exports: [CategoryService, CategoryRepository],
 })
 export class CategoryModule {}

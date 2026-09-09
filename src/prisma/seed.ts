@@ -26,8 +26,29 @@ const PERMISSIONS_SEED = [
   { code: 'CATEGORY_UPDATE', name: 'Sửa category', group: 'CATEGORY' },
   { code: 'CATEGORY_DELETE', name: 'Xoá category', group: 'CATEGORY' },
 
-  // ROLE
+  // LEARNING_PATH
+  {
+    code: 'LEARNING_PATH_LIST',
+    name: 'Xem danh sách lộ trình học',
+    group: 'LEARNING_PATH',
+  },
+  {
+    code: 'LEARNING_PATH_CREATE',
+    name: 'Tạo lộ trình học',
+    group: 'LEARNING_PATH',
+  },
+  {
+    code: 'LEARNING_PATH_UPDATE',
+    name: 'Sửa lộ trình học',
+    group: 'LEARNING_PATH',
+  },
+  {
+    code: 'LEARNING_PATH_DELETE',
+    name: 'Xoá lộ trình học',
+    group: 'LEARNING_PATH',
+  },
 
+  // ROLE
   { code: 'ROLE_LIST', name: 'Xem danh sách role', group: 'ROLE' },
   { code: 'ROLE_CREATE', name: 'Tạo role', group: 'ROLE' },
   { code: 'ROLE_UPDATE', name: 'Sửa role', group: 'ROLE' },

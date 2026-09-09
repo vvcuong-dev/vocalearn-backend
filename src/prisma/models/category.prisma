@@ -3,7 +3,9 @@ model Category {
     name        String
     description String?
     slug        String  @unique
-    order       Int     @default(0)
+    order       Int     @default(1) // Thứ tự hiển thị
+
+    learningPaths LearningPath[]
 
     createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp
     updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamp()

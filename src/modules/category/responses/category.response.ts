@@ -1,4 +1,3 @@
-// responses/category.response.ts
 import { ApiProperty } from '@nestjs/swagger';
 import { Category } from '../../../generated/prisma/client';
 

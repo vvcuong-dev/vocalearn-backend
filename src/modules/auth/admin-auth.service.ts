@@ -69,7 +69,7 @@ export class AdminAuthService {
     await this.redis.set(
       CACHE.AUTH._KEY.REFRESH_TOKEN(ActorType.ADMIN, admin.id, refreshJti),
       refreshToken,
-      { EX: TTL.WEEK },
+      { EX: TTL.VERY_LONG },
     );
 
     return new LoginResponse({ accessToken, refreshToken });

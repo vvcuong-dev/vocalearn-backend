@@ -1,0 +1,22 @@
+// ================== LEARNING PATH (Lộ trình học — admin dựng) ==================
+model LearningPath {
+    id          Int     @id @default(autoincrement())
+    name        String // "Luyện thi HSA - VACT"
+    description String? @db.Text
+    slug        String  @unique // "luyen-thi-hsa-vact"
+    thumbnail   String? // "https://vocalearn.s3.ap-southeast-1.amazonaws.com/learning-paths/1689051870.png"
+    difficulty  Int     @default(1) // ĐỘ KHÓ 1-5
+    order       Int     @default(1) // Thứ tự hiển thị
+    isActive    Boolean @default(true)
+
+    categoryId Int      @map("category_id")
+    category   Category @relation(fields: [categoryId], references: [id])
+
+    createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp
+    updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamp()
+    deleted   Boolean   @default(false)
+    deletedAt DateTime? @map("deleted_at") @db.Timestamp
+
+    @@index([categoryId])
+    @@map("learning_paths")
+}
