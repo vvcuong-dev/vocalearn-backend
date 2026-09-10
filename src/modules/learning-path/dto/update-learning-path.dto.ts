@@ -1,9 +1,8 @@
-import { PartialType } from '@nestjs/mapped-types';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsInt, IsOptional, Min } from 'class-validator';
 import { BaseLearningPathDto } from './base-learning-path.dto';
 
-export class UpdateLearningPathDto extends PartialType(BaseLearningPathDto) {
+export class UpdateLearningPathDto extends BaseLearningPathDto {
   @ApiPropertyOptional({ example: 1 })
   @IsOptional()
   @IsInt()

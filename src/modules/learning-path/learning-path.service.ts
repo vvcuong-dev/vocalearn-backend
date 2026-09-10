@@ -13,6 +13,7 @@ import {
 import { AppException } from '../../common/exceptions/app.exception';
 import { VOCALEARN_ERROR_CODES } from '../../constants/error-code.constant';
 import { LearningPathResponse } from './response/learning-path.response';
+import { LearningPathGroupedByCategoryResponse } from './response/learning-path-grouped-by-category.response';
 
 @Injectable()
 export class LearningPathService {
@@ -166,5 +167,24 @@ export class LearningPathService {
 
     await this.learningPathRepository.deleteById(id);
     return true;
+  }
+  async findAllGroupedByCategory(
+    categoryId?: number,
+  ): Promise<LearningPathGroupedByCategoryResponse[]> {
+    const categories =
+      await this.learningPathRepository.findGroupedByCategory(categoryId);
+
+    if (categoryId !== undefined && categories.length === 0) {
+      throw new AppException(
+        VOCALEARN_ERROR_CODES.CATEGORY.CATEGORY_NOT_FOUND,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    return categories
+      .map((c) => new LearningPathGroupedByCategoryResponse(c, c.learningPaths))
+      .filter((r) => categoryId !== undefined || r.totalCount > 0);
+    // khi lọc theo 1 categoryId cụ thể: luôn trả về dù learningPaths rỗng (để FE biết category tồn tại)
+    // khi lấy tất cả: ẩn bớt category không có learning path nào (giữ đúng behavior cũ)
   }
 }

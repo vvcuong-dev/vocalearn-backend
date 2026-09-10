@@ -47,4 +47,20 @@ export class LearningPathRepository extends BaseRepository<
       },
     });
   }
+
+  async findGroupedByCategory(categoryId?: number) {
+    return this.prisma.category.findMany({
+      where: {
+        deleted: false,
+        ...(categoryId !== undefined ? { id: categoryId } : {}),
+      },
+      orderBy: [{ order: 'asc' }],
+      include: {
+        learningPaths: {
+          where: { deleted: false, isActive: true },
+          orderBy: [{ order: 'asc' }],
+        },
+      },
+    });
+  }
 }
