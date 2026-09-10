@@ -12,6 +12,7 @@ import { AppException } from '../../common/exceptions/app.exception';
 import { VOCALEARN_ERROR_CODES } from '../../constants/error-code.constant';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { CategorySummaryResponse } from './responses/category-summary.response';
 
 @Injectable()
 export class CategoryService {
@@ -122,5 +123,22 @@ export class CategoryService {
     }
     await this.categoryRepository.deleteById(id);
     return true;
+  }
+
+  async findAllSummary(): Promise<CategorySummaryResponse[]> {
+    const categories = await this.categoryRepository.findAll({
+      where: {
+        deleted: false,
+      },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        order: true,
+      },
+      orderBy: [{ order: 'asc' }],
+    });
+
+    return categories.map((category) => new CategorySummaryResponse(category));
   }
 }
