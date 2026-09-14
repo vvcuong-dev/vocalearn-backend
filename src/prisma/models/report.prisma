@@ -1,0 +1,20 @@
+model Report {
+    id         Int              @id @default(autoincrement())
+    targetType ReportTargetType
+    targetId   Int              @map("target_id")
+    reason     String           @db.Text
+
+    reporterId Int  @map("reporter_id")
+    reporter   User @relation(fields: [reporterId], references: [id])
+
+    status       ReportStatus @default(PENDING)
+    resolvedById Int?         @map("resolved_by_id")
+    resolvedBy   Admin?       @relation(fields: [resolvedById], references: [id])
+    resolvedAt   DateTime?    @map("resolved_at")
+
+    createdAt DateTime @default(now()) @map("created_at") @db.Timestamp
+
+    @@index([targetType, targetId])
+    @@index([status])
+    @@map("reports")
+}

@@ -1,0 +1,36 @@
+model WordSet {
+    id          Int     @id @default(autoincrement())
+    name        String
+    description String? @db.Text
+    order       Int     @default(0) // #1, #2... trong 1 LearningPath
+    wordCount   Int     @default(0) // denormalize, update atomic khi CRUD Word // ví dụ: 1 WordSet có 10 Word, thì wordCount = 10
+    isPro       Boolean @default(false)
+
+    // null = user tạo (đứng riêng/trong folder); có giá trị = official, thuộc lộ trình admin dựng
+    learningPathId Int?          @map("learning_path_id")
+    learningPath   LearningPath? @relation(fields: [learningPathId], references: [id])
+
+    // null = admin/official tạo; có giá trị = user tự tạo
+    creatorId Int?  @map("creator_id")
+    creator   User? @relation(fields: [creatorId], references: [id])
+
+    // null = đứng riêng lẻ; có giá trị = nằm trong 1 Folder
+    folderId Int?    @map("folder_id")
+    folder   Folder? @relation(fields: [folderId], references: [id])
+
+    isPublic        Boolean @default(false)
+    isHiddenByAdmin Boolean @default(false)
+
+    words Word[]
+
+    createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp
+    updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamp()
+    deleted   Boolean   @default(false)
+    deletedAt DateTime? @map("deleted_at") @db.Timestamp
+
+    @@index([learningPathId])
+    @@index([creatorId])
+    @@index([folderId])
+    @@index([isPublic, isHiddenByAdmin])
+    @@map("word_sets")
+}

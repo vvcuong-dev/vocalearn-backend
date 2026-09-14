@@ -1,0 +1,8 @@
+enum WordType {
+    N
+    V
+    ADJ
+    ADV
+    PHRASE
+    IDIOM
+}

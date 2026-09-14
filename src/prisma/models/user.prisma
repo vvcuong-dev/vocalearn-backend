@@ -8,6 +8,11 @@ model User {
     avatarPublicId String?    @map("avatar_public_id")
     phone          String?
 
+    createdFolders  Folder[]
+    createdWordSets WordSet[]
+    folderUpvotes   FolderUpvote[]
+    reports         Report[]
+
     createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp
     updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamp()
     deleted   Boolean   @default(false)

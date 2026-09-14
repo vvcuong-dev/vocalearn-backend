@@ -11,6 +11,8 @@ model Admin {
     roleId Int?  @map("role_id")
     role   Role? @relation(fields: [roleId], references: [id])
 
+    resolvedReports Report[]
+
     createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp
     updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamp()
     deleted   Boolean   @default(false)

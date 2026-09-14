@@ -1,0 +1,12 @@
+model FolderUpvote {
+    id       Int    @id @default(autoincrement())
+    folderId Int    @map("folder_id")
+    folder   Folder @relation(fields: [folderId], references: [id])
+    userId   Int    @map("user_id")
+    user     User   @relation(fields: [userId], references: [id])
+
+    createdAt DateTime @default(now()) @map("created_at") @db.Timestamp
+
+    @@unique([folderId, userId])
+    @@map("folder_upvotes")
+}

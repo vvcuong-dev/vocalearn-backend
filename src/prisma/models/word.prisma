@@ -1,0 +1,20 @@
+model Word {
+    id           Int      @id @default(autoincrement())
+    term         String // "upbringing"
+    phonetic     String? // "/ˈʌp.brɪŋ.ɪŋ/"
+    meaning      String // "sự nuôi dạy"
+    partOfSpeech WordType
+    example      String?  @db.Text
+    audioUrl     String?
+
+    wordSetId Int     @map("word_set_id")
+    wordSet   WordSet @relation(fields: [wordSetId], references: [id])
+
+    createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp
+    updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamp()
+    deleted   Boolean   @default(false)
+    deletedAt DateTime? @map("deleted_at") @db.Timestamp
+
+    @@index([wordSetId])
+    @@map("words")
+}

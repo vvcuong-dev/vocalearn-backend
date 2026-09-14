@@ -9,6 +9,8 @@ model LearningPath {
     order       Int     @default(1) // Thứ tự hiển thị
     isActive    Boolean @default(true)
 
+    wordSets WordSet[]
+
     categoryId Int      @map("category_id")
     category   Category @relation(fields: [categoryId], references: [id])
 

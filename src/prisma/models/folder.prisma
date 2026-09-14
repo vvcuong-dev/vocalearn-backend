@@ -1,0 +1,24 @@
+model Folder {
+    id          Int     @id @default(autoincrement())
+    name        String // "TOEIC Reading"
+    description String?
+
+    creatorId Int  @map("creator_id")
+    creator   User @relation(fields: [creatorId], references: [id])
+
+    isPublic        Boolean @default(false) // "CÔNG KHAI" — tự bật, không cần admin duyệt
+    isHiddenByAdmin Boolean @default(false) // admin ẩn khi vi phạm (hậu kiểm)
+    upvoteCount     Int     @default(0) // denormalize để sort "Thịnh hành"
+
+    wordSets WordSet[]
+    upvotes  FolderUpvote[]
+
+    createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp
+    updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamp()
+    deleted   Boolean   @default(false)
+    deletedAt DateTime? @map("deleted_at") @db.Timestamp
+
+    @@index([creatorId])
+    @@index([isPublic, isHiddenByAdmin, upvoteCount])
+    @@map("folders")
+}
