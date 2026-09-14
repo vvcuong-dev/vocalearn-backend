@@ -17,6 +17,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { AdminModule } from './modules/admin/admin.module';
 import { CategoryModule } from './modules/category/category.module';
 import { LearningPathModule } from './modules/learning-path/learning-path.module';
+import { WordSetModule } from './modules/word-set/word-set.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { LearningPathModule } from './modules/learning-path/learning-path.module
     AdminModule,
     CategoryModule,
     LearningPathModule,
+    WordSetModule,
   ],
   controllers: [AppController],
   providers: [AppService],
