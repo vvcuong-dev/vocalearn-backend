@@ -24,17 +24,17 @@ export class LearningPathRepository extends BaseRepository<
     });
   }
 
-  async findBySlugOrNameExists(
+  async findDuplicateByName(
     name: string,
     categoryId: number,
     excludeId?: number,
-  ) {
-    return this.prisma.learningPath.findFirst({
+  ): Promise<LearningPath | null> {
+    return this.delegate.findFirst({
       where: {
         name,
         categoryId,
         deleted: false,
-        ...(excludeId && { id: { not: excludeId } }),
+        ...(excludeId ? { id: { not: excludeId } } : {}),
       },
     });
   }

@@ -100,7 +100,7 @@ export class LearningPathService {
   async create(dto: CreateLearningPathDto): Promise<LearningPathResponse> {
     await this.assertCategoryExists(dto.categoryId);
 
-    const duplicated = await this.learningPathRepository.findBySlugOrNameExists(
+    const duplicated = await this.learningPathRepository.findDuplicateByName(
       dto.name,
       dto.categoryId,
     );
