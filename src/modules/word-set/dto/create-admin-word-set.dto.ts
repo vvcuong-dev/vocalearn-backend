@@ -1,35 +1,16 @@
-import {
-  IsBoolean,
-  IsInt,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  Min,
-} from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsBoolean, IsInt, IsNotEmpty, IsOptional, Min } from 'class-validator';
+import { BaseWordSetDto } from './base-word-set.dto';
 
-export class CreateAdminWordSetDto {
+export class CreateAdminWordSetDto extends BaseWordSetDto {
+  @ApiPropertyOptional({ example: false, default: false })
+  @IsOptional()
+  @IsBoolean()
+  isPro?: boolean;
+
+  @ApiProperty({ example: 1 })
   @IsNotEmpty()
-  @IsString()
-  name!: string;
-
-  @IsOptional()
-  @IsString()
-  description?: string | null;
-
-  @IsOptional()
   @IsInt()
   @Min(1)
-  order?: number = 1;
-
-  @IsOptional()
-  @IsBoolean()
-  isPro?: boolean = false;
-
-  @IsOptional()
-  @IsBoolean()
-  isPublic?: boolean = true;
-
-  @IsNotEmpty()
-  @IsInt()
   learningPathId!: number;
 }
