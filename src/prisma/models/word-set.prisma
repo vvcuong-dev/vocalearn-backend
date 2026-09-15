@@ -1,6 +1,7 @@
 model WordSet {
     id          Int     @id @default(autoincrement())
     name        String
+    slug        String  @unique
     description String? @db.Text
     order       Int     @default(0) // #1, #2... trong 1 LearningPath
     wordCount   Int     @default(0) // denormalize, update atomic khi CRUD Word // ví dụ: 1 WordSet có 10 Word, thì wordCount = 10
@@ -18,9 +19,6 @@ model WordSet {
     folderId Int?    @map("folder_id")
     folder   Folder? @relation(fields: [folderId], references: [id])
 
-    isPublic        Boolean @default(false)
-    isHiddenByAdmin Boolean @default(false)
-
     words Word[]
 
     createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp
@@ -31,6 +29,5 @@ model WordSet {
     @@index([learningPathId])
     @@index([creatorId])
     @@index([folderId])
-    @@index([isPublic, isHiddenByAdmin])
     @@map("word_sets")
 }

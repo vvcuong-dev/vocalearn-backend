@@ -17,7 +17,7 @@ export class PrismaService
       password: decodeURIComponent(dbUrl.password),
       database: dbUrl.pathname.replace(/^\//, ''),
     });
-    super({ adapter });
+    super({ adapter, log: ['query', 'info', 'warn', 'error'] });
   }
 
   async onModuleInit() {

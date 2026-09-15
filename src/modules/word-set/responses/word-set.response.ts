@@ -1,36 +1,100 @@
-import { Exclude, Expose, Type } from 'class-transformer';
+import { Prisma, WordSet } from '../../../generated/prisma/client';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+
+export const INCLUDE = {
+  learningPath: { select: { id: true, name: true } },
+  creator: { select: { id: true, name: true } },
+  folder: { select: { id: true, name: true } },
+} satisfies Prisma.WordSetInclude;
+
+export type WordSetEntity = WordSet &
+  Partial<Prisma.WordSetGetPayload<{ include: typeof INCLUDE }>>;
 
 class LearningPathBrief {
-  @Expose() id?: number;
-  @Expose() name?: string;
+  @ApiProperty({ example: 1 })
+  id: number;
+  @ApiProperty({ example: 'TOEIC cơ bản' })
+  name: string;
+
+  constructor(learningPath: { id: number; name: string }) {
+    this.id = learningPath.id;
+    this.name = learningPath.name;
+  }
 }
+
 class CreatorBrief {
-  @Expose() id?: number;
-  @Expose() fullName?: string;
+  @ApiProperty({ example: 1 })
+  id: number;
+  @ApiProperty({ example: 'Nguyễn Văn An' })
+  fullName: string;
+
+  constructor(creator: { id: number; name: string }) {
+    this.id = creator.id;
+    this.fullName = creator.name;
+  }
 }
+
 class FolderBrief {
-  @Expose() id?: number;
-  @Expose() name?: string;
+  @ApiProperty({ example: 1 })
+  id: number;
+  @ApiProperty({ example: 'Ôn tập TOEIC' })
+  name: string;
+
+  constructor(folder: { id: number; name: string }) {
+    this.id = folder.id;
+    this.name = folder.name;
+  }
 }
 
-@Exclude()
 export class WordSetResponse {
-  @Expose() id?: number;
-  @Expose() name?: string;
-  @Expose() order?: number;
-  @Expose() description?: string | null;
-  @Expose() wordCount?: number;
-  @Expose() isPro?: boolean;
-  @Expose() isPublic?: boolean;
-  @Expose() isHiddenByAdmin?: boolean;
-  @Expose() learningPathId?: number | null;
-  @Expose() creatorId?: number | null;
-  @Expose() folderId?: number | null;
+  @ApiProperty({ example: 1 })
+  id: number;
+  @ApiProperty({ example: 'Từ vựng TOEIC - Công việc' })
+  name: string;
+  @ApiProperty({ example: 'tu-vung-toeic-cong-viec' })
+  slug!: string;
+  @ApiProperty({ example: 1 })
+  order: number;
+  @ApiProperty({
+    type: String,
+    nullable: true,
+    example: 'Các từ vựng thường gặp tại nơi làm việc',
+  })
+  description: string | null;
+  @ApiProperty({ example: 20 })
+  wordCount: number;
+  @ApiProperty({ example: false })
+  isPro: boolean;
 
-  @Expose() @Type(() => LearningPathBrief) learningPath?: LearningPathBrief;
-  @Expose() @Type(() => CreatorBrief) creator?: CreatorBrief;
-  @Expose() @Type(() => FolderBrief) folder?: FolderBrief;
+  @ApiPropertyOptional({ type: () => LearningPathBrief })
+  learningPath?: LearningPathBrief;
 
-  @Expose() createdAt!: Date;
-  @Expose() updatedAt!: Date;
+  @ApiPropertyOptional({ type: () => CreatorBrief })
+  creator?: CreatorBrief;
+
+  @ApiPropertyOptional({ type: () => FolderBrief })
+  folder?: FolderBrief;
+
+  @ApiProperty({ type: String, format: 'date-time' })
+  createdAt: Date;
+  @ApiProperty({ type: String, format: 'date-time' })
+  updatedAt: Date;
+
+  constructor(entity: WordSetEntity) {
+    this.id = entity.id;
+    this.name = entity.name;
+    this.order = entity.order;
+    this.description = entity.description;
+    this.wordCount = entity.wordCount;
+    this.isPro = entity.isPro;
+    this.learningPath = entity.learningPath
+      ? new LearningPathBrief(entity.learningPath)
+      : undefined;
+    this.creator = entity.creator
+      ? new CreatorBrief(entity.creator)
+      : undefined;
+    this.folder = entity.folder ? new FolderBrief(entity.folder) : undefined;
+    this.createdAt = entity.createdAt;
+    this.updatedAt = entity.updatedAt;
+  }
 }
