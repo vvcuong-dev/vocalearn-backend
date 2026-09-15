@@ -33,6 +33,7 @@ import { ActorGuard } from '../../common/guards/actor.guard';
 import { RequireActor } from '../../common/decorators/actor.decorator';
 import { ActorType } from '../../constants/actor-type.constant';
 import type { RequestWithUser } from '../../common/types/request-with-user.type';
+import { UpdateUserWordSetDto } from './dto/update-user-word-set.dto';
 
 @ApiTags('Word Sets')
 @ApiBearerAuth()
@@ -48,7 +49,10 @@ export class WordSetController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'List public word sets and your own word sets' })
+  @ApiOperation({
+    summary:
+      'List your word sets, word sets in public folders and active learning paths',
+  })
   @ApiResponse({ status: 200, type: PaginatedResponse })
   findAll(@Req() req: RequestWithUser, @Query() query: QueryWordSetDto) {
     return this.wordSetService.findAll(query, this.actorOf(req));
@@ -73,7 +77,7 @@ export class WordSetController {
   @Patch(':id')
   @ApiOperation({ summary: 'Update your own word set' })
   @ApiParam({ name: 'id', type: Number })
-  @ApiBody({ type: UpdateWordSetDto })
+  @ApiBody({ type: UpdateUserWordSetDto })
   @ApiResponse({ status: 200, type: WordSetResponse })
   update(
     @Req() req: RequestWithUser,
