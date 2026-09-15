@@ -18,6 +18,7 @@ import { AdminModule } from './modules/admin/admin.module';
 import { CategoryModule } from './modules/category/category.module';
 import { LearningPathModule } from './modules/learning-path/learning-path.module';
 import { WordSetModule } from './modules/word-set/word-set.module';
+import { FolderModule } from './modules/folder/folder.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { WordSetModule } from './modules/word-set/word-set.module';
     CategoryModule,
     LearningPathModule,
     WordSetModule,
+    FolderModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,7 +1,7 @@
 model Folder {
-    id          Int     @id @default(autoincrement())
-    name        String // "TOEIC Reading"
-    description String?
+    id   Int    @id @default(autoincrement())
+    name String // "TOEIC Reading"
+    slug String @unique // "toeic-reading" — dùng để tạo URL, không đổi sau khi tạo
 
     creatorId Int  @map("creator_id")
     creator   User @relation(fields: [creatorId], references: [id])

@@ -54,6 +54,10 @@ const PERMISSIONS_SEED = [
   { code: 'WORD_SET_UPDATE', name: 'Sửa bộ từ', group: 'WORD_SET' },
   { code: 'WORD_SET_DELETE', name: 'Xoá bộ từ', group: 'WORD_SET' },
 
+  // FOLDER
+  { code: 'FOLDER_LIST', name: 'Xem danh sách folder', group: 'FOLDER' },
+  { code: 'FOLDER_UPDATE', name: 'Ẩn/hiện folder vi phạm', group: 'FOLDER' },
+
   // ROLE
   { code: 'ROLE_LIST', name: 'Xem danh sách role', group: 'ROLE' },
   { code: 'ROLE_CREATE', name: 'Tạo role', group: 'ROLE' },

@@ -23,6 +23,10 @@ export const PERMISSIONS = {
     UPDATE: 'WORD_SET_UPDATE',
     DELETE: 'WORD_SET_DELETE',
   },
+  FOLDER: {
+    LIST: 'FOLDER_LIST',
+    UPDATE: 'FOLDER_UPDATE',
+  },
   ROLE: {
     LIST: 'ROLE_LIST',
     CREATE: 'ROLE_CREATE',
