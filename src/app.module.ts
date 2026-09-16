@@ -19,6 +19,7 @@ import { CategoryModule } from './modules/category/category.module';
 import { LearningPathModule } from './modules/learning-path/learning-path.module';
 import { WordSetModule } from './modules/word-set/word-set.module';
 import { FolderModule } from './modules/folder/folder.module';
+import { MeModule } from './modules/me/me.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { FolderModule } from './modules/folder/folder.module';
     LearningPathModule,
     WordSetModule,
     FolderModule,
+    MeModule,
   ],
   controllers: [AppController],
   providers: [AppService],

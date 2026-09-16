@@ -4,10 +4,9 @@ import { UserController } from './user.controller';
 import { CloudinaryModule } from '../cloudinary/cloudinary.module';
 import { PermissionModule } from '../permission/permission.module';
 import { UserRepository } from './repositories/user.repository';
-import { UserProfileController } from './user-profile.controller';
 
 @Module({
-  controllers: [UserController, UserProfileController],
+  controllers: [UserController],
   providers: [UserService, UserRepository],
   exports: [UserService, UserRepository],
   imports: [CloudinaryModule, PermissionModule],
