@@ -21,21 +21,11 @@ type FolderActor =
 export class FolderService {
   constructor(private readonly folderRepository: FolderRepository) {}
 
-  private buildWhereClause(
-    query: QueryFolderDto,
-    actor: FolderActor,
-  ): Prisma.FolderWhereInput {
+  private buildWhereClause(query: QueryFolderDto): Prisma.FolderWhereInput {
     const where: Prisma.FolderWhereInput = { deleted: false };
 
     if (query.keyword) {
       where.slug = { contains: toSlug(query.keyword) };
-    }
-
-    if (actor.type === ActorType.USER) {
-      where.OR = [
-        { creatorId: actor.userId },
-        { isPublic: true, isHiddenByAdmin: false },
-      ];
     }
 
     return where;
@@ -43,9 +33,8 @@ export class FolderService {
 
   async findAll(
     query: QueryFolderDto,
-    actor: FolderActor,
   ): Promise<PaginatedResponse<FolderResponse>> {
-    const where = this.buildWhereClause(query, actor);
+    const where = this.buildWhereClause(query);
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
 
@@ -67,8 +56,13 @@ export class FolderService {
   }
 
   async findOne(id: number, actor: FolderActor): Promise<FolderResponse> {
-    const where = this.buildWhereClause({}, actor);
-    where.id = id;
+    const where: Prisma.FolderWhereInput = { id, deleted: false };
+    if (actor.type === ActorType.USER) {
+      where.OR = [
+        { creatorId: actor.userId },
+        { isPublic: true, isHiddenByAdmin: false },
+      ];
+    }
 
     const folder = await this.folderRepository.findFirstByWhere(where);
     if (!folder) {

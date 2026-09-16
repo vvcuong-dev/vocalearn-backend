@@ -7,7 +7,6 @@
   ParseIntPipe,
   Patch,
   Post,
-  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -21,12 +20,9 @@ import {
 } from '@nestjs/swagger';
 
 import { WordSetService } from './word-set.service';
-import { QueryWordSetDto } from './dto/query-word-set.dto';
 import { CreateUserWordSetDto } from './dto/create-user-word-set.dto';
 import { UpdateWordSetDto } from './dto/update-word-set.dto';
 import { WordSetResponse } from './responses/word-set.response';
-
-import { PaginatedResponse } from '../../common/responses/paginated.response';
 
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { ActorGuard } from '../../common/guards/actor.guard';
@@ -46,16 +42,6 @@ export class WordSetController {
   // Gom logic build actor về 1 chỗ, tránh lặp lại ở từng method bên dưới
   private actorOf(req: RequestWithUser) {
     return { type: ActorType.USER as const, userId: req.user.id };
-  }
-
-  @Get()
-  @ApiOperation({
-    summary:
-      'List your word sets, word sets in public folders and active learning paths',
-  })
-  @ApiResponse({ status: 200, type: PaginatedResponse })
-  findAll(@Req() req: RequestWithUser, @Query() query: QueryWordSetDto) {
-    return this.wordSetService.findAll(query, this.actorOf(req));
   }
 
   @Get(':id')

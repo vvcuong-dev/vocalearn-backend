@@ -50,7 +50,7 @@ export class AdminWordSetController {
   @ApiOperation({ summary: 'List word sets with filters' })
   @ApiResponse({ status: 200, type: PaginatedResponse })
   findAll(@Query() query: QueryWordSetDto) {
-    return this.wordSetService.findAll(query, ADMIN_ACTOR);
+    return this.wordSetService.findAll(query);
   }
 
   @Get(':id')

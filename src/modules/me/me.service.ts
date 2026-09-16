@@ -57,7 +57,7 @@ export class MeService {
 
     // Lấy folder trước nếu trang hiện tại chưa vượt qua hết folder.
     if (skip < folderCount) {
-      const folders = await this.folderRepository.findAll({
+      const folders = await this.folderRepository.findAllWithWordSetCount({
         where: folderWhere,
         orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
         skip,

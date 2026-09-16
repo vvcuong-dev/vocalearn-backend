@@ -27,10 +27,7 @@ export class WordSetService {
     private readonly learningPathRepository: LearningPathRepository,
   ) {}
 
-  private buildWhereClause(
-    query: QueryWordSetDto,
-    actor: WordSetActor,
-  ): Prisma.WordSetWhereInput {
+  private buildWhereClause(query: QueryWordSetDto): Prisma.WordSetWhereInput {
     const where: Prisma.WordSetWhereInput = { deleted: false };
 
     if (query.keyword) {
@@ -40,22 +37,6 @@ export class WordSetService {
       where.learningPathId = query.learningPathId;
     if (query.folderId !== undefined) where.folderId = query.folderId;
     if (query.isPro !== undefined) where.isPro = query.isPro;
-
-    // User chỉ xem: set của mình, set trong folder công khai, hoặc set chính thức thuộc lộ trình đang hoạt động
-    if (actor.type === ActorType.USER) {
-      where.OR = [
-        { creatorId: actor.userId },
-        {
-          folder: {
-            is: { deleted: false, isPublic: true, isHiddenByAdmin: false },
-          },
-        },
-        {
-          creatorId: null,
-          learningPath: { is: { deleted: false, isActive: true } },
-        },
-      ];
-    }
 
     return where;
   }
@@ -72,9 +53,8 @@ export class WordSetService {
 
   async findAll(
     query: QueryWordSetDto,
-    actor: WordSetActor,
   ): Promise<PaginatedResponse<WordSetResponse>> {
-    const where = this.buildWhereClause(query, actor);
+    const where = this.buildWhereClause(query);
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
 
@@ -97,8 +77,23 @@ export class WordSetService {
   }
 
   async findOne(id: number, actor: WordSetActor): Promise<WordSetResponse> {
-    const where = this.buildWhereClause({}, actor);
-    where.id = id;
+    const where: Prisma.WordSetWhereInput = { id, deleted: false };
+
+    // User chỉ xem: set của mình, set trong folder công khai, hoặc set chính thức thuộc lộ trình đang hoạt động
+    if (actor.type === ActorType.USER) {
+      where.OR = [
+        { creatorId: actor.userId },
+        {
+          folder: {
+            is: { deleted: false, isPublic: true, isHiddenByAdmin: false },
+          },
+        },
+        {
+          creatorId: null,
+          learningPath: { is: { deleted: false, isActive: true } },
+        },
+      ];
+    }
 
     const wordSet = await this.wordSetRepository.findFirstByWhere(where);
     if (!wordSet) {

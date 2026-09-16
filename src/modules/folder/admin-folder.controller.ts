@@ -43,7 +43,7 @@ export class AdminFolderController {
   @ApiOperation({ summary: 'List all folders for moderation' })
   @ApiResponse({ status: 200, type: PaginatedResponse })
   findAll(@Query() query: QueryFolderDto) {
-    return this.folderService.findAll(query, ADMIN_ACTOR);
+    return this.folderService.findAll(query);
   }
 
   @Get(':id')

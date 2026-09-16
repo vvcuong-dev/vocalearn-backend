@@ -7,7 +7,6 @@ import {
   ParseIntPipe,
   Patch,
   Post,
-  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -21,12 +20,10 @@ import {
 } from '@nestjs/swagger';
 
 import { FolderService } from './folder.service';
-import { QueryFolderDto } from './dto/query-folder.dto';
 import { CreateFolderDto } from './dto/create-folder.dto';
 import { UpdateFolderDto } from './dto/update-folder.dto';
 import { UpdateFolderVisibilityDto } from './dto/update-folder-visibility.dto';
 import { FolderResponse } from './responses/folder.response';
-import { PaginatedResponse } from '../../common/responses/paginated.response';
 
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { ActorGuard } from '../../common/guards/actor.guard';
@@ -44,13 +41,6 @@ export class FolderController {
 
   private actorOf(req: RequestWithUser) {
     return { type: ActorType.USER as const, userId: req.user.id };
-  }
-
-  @Get()
-  @ApiOperation({ summary: 'List your folders and public folders' })
-  @ApiResponse({ status: 200, type: PaginatedResponse })
-  findAll(@Req() req: RequestWithUser, @Query() query: QueryFolderDto) {
-    return this.folderService.findAll(query, this.actorOf(req));
   }
 
   @Get(':id')
