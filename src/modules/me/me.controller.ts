@@ -11,6 +11,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { MeService } from './me.service';
+import { WordSetResponse } from '../word-set/responses/word-set.response';
 import { QueryLibraryDto } from './dto/query-library.dto';
 import { PaginatedResponse } from '../../common/responses/paginated.response';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
@@ -39,6 +40,13 @@ import {
 @RequireActor(ActorType.USER)
 export class MeController {
   constructor(private readonly meService: MeService) {}
+
+  @Get('word-sets')
+  @ApiOperation({ summary: 'List all your word sets for the word selector' })
+  @ApiResponse({ status: 200, type: [WordSetResponse] })
+  findAllWordSets(@Req() req: RequestWithUser) {
+    return this.meService.findAllWordSets(req.user.id);
+  }
 
   @Get('library')
   @ApiOperation({

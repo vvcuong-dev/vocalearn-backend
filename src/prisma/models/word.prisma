@@ -1,11 +1,13 @@
 model Word {
-    id           Int      @id @default(autoincrement())
+    id           Int       @id @default(autoincrement())
     term         String // "upbringing"
+    slug         String // "upbringing"
     phonetic     String? // "/ˈʌp.brɪŋ.ɪŋ/"
-    meaning      String // "sự nuôi dạy"
-    partOfSpeech WordType
-    example      String?  @db.Text
+    meaning      String    @db.Text // "sự nuôi dạy"
+    partOfSpeech WordType?
+    example      String?   @db.Text
     audioUrl     String?
+    note         String?   @db.Text
 
     wordSetId Int     @map("word_set_id")
     wordSet   WordSet @relation(fields: [wordSetId], references: [id])
@@ -18,3 +20,5 @@ model Word {
     @@index([wordSetId])
     @@map("words")
 }
+
+// @db.Text nghĩa là kiểu dữ liệu text trong cơ sở dữ liệu, thường được sử dụng để lưu trữ các chuỗi văn bản dài. Trong Prisma, khi bạn sử dụng @db.Text, nó sẽ ánh xạ trường đó sang kiểu dữ liệu text trong cơ sở dữ liệu mà bạn đang sử dụng (ví dụ: PostgreSQL, MySQL, v.v.).

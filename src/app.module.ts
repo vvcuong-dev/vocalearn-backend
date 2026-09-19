@@ -20,6 +20,7 @@ import { LearningPathModule } from './modules/learning-path/learning-path.module
 import { WordSetModule } from './modules/word-set/word-set.module';
 import { FolderModule } from './modules/folder/folder.module';
 import { MeModule } from './modules/me/me.module';
+import { WordModule } from './modules/word/word.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { MeModule } from './modules/me/me.module';
     WordSetModule,
     FolderModule,
     MeModule,
+    WordModule,
   ],
   controllers: [AppController],
   providers: [AppService],

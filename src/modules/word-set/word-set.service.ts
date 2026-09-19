@@ -17,7 +17,7 @@ import { ActorType } from '../../constants/actor-type.constant';
 import { generateUniqueSlug, toSlug } from '../../utils/slug.util';
 import { UpdateUserWordSetDto } from './dto/update-user-word-set.dto';
 
-type WordSetActor =
+export type WordSetActor =
   { type: ActorType.ADMIN } | { type: ActorType.USER; userId: number };
 
 @Injectable()
@@ -76,7 +76,7 @@ export class WordSetService {
     );
   }
 
-  async findOne(id: number, actor: WordSetActor): Promise<WordSetResponse> {
+  private async findReadableWordSet(id: number, actor: WordSetActor) {
     const where: Prisma.WordSetWhereInput = { id, deleted: false };
 
     // User chỉ xem: set của mình, set trong folder công khai, hoặc set chính thức thuộc lộ trình đang hoạt động
@@ -103,7 +103,69 @@ export class WordSetService {
       );
     }
 
+    return wordSet;
+  }
+
+  async assertCanRead(wordSetId: number, actor: WordSetActor): Promise<void> {
+    await this.findReadableWordSet(wordSetId, actor);
+  }
+
+  async findOne(id: number, actor: WordSetActor): Promise<WordSetResponse> {
+    const wordSet = await this.findReadableWordSet(id, actor);
     return new WordSetResponse(wordSet);
+  }
+
+  async assertCanWrite(wordSetId: number, actor: WordSetActor): Promise<void> {
+    const wordSet = await this.wordSetRepository.findActiveById(wordSetId);
+    if (!wordSet) {
+      throw new AppException(
+        VOCALEARN_ERROR_CODES.WORD_SET.WORD_SET_NOT_FOUND,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    if (actor.type === ActorType.USER) {
+      if (
+        wordSet.creatorId !== actor.userId ||
+        wordSet.learningPathId !== null
+      ) {
+        throw new AppException(
+          VOCALEARN_ERROR_CODES.AUTH.PERMISSION_DENIED,
+          HttpStatus.FORBIDDEN,
+        );
+      }
+      if (wordSet.folderId !== null) {
+        const validFolder = await this.wordSetRepository.findFirstByWhere({
+          id: wordSetId,
+          deleted: false,
+          folder: { is: { deleted: false, creatorId: actor.userId } },
+        });
+        if (!validFolder) {
+          throw new AppException(
+            VOCALEARN_ERROR_CODES.FOLDER.FOLDER_NOT_FOUND,
+            HttpStatus.NOT_FOUND,
+          );
+        }
+      }
+    } else {
+      if (wordSet.creatorId !== null || wordSet.learningPathId === null) {
+        throw new AppException(
+          VOCALEARN_ERROR_CODES.AUTH.PERMISSION_DENIED,
+          HttpStatus.FORBIDDEN,
+        );
+      }
+      const validPath = await this.wordSetRepository.findFirstByWhere({
+        id: wordSetId,
+        deleted: false,
+        learningPath: { is: { deleted: false } },
+      });
+      if (!validPath) {
+        throw new AppException(
+          VOCALEARN_ERROR_CODES.LEARNING_PATH.LEARNING_PATH_NOT_FOUND,
+          HttpStatus.NOT_FOUND,
+        );
+      }
+    }
   }
 
   async create(dto: CreateAdminWordSetDto): Promise<WordSetResponse> {

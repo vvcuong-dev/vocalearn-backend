@@ -26,6 +26,15 @@ export class MeService {
     private readonly wordSetRepository: WordSetRepository,
   ) {}
 
+  async findAllWordSets(userId: number): Promise<WordSetResponse[]> {
+    const wordSets = await this.wordSetRepository.findAll({
+      where: { creatorId: userId, deleted: false, learningPathId: null },
+      include: INCLUDE,
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+    });
+    return wordSets.map((wordSet) => new WordSetResponse(wordSet));
+  }
+
   async getLibrary(
     userId: number,
     query: QueryLibraryDto,

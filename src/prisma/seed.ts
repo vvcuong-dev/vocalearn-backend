@@ -48,6 +48,12 @@ const PERMISSIONS_SEED = [
     group: 'LEARNING_PATH',
   },
 
+  // WORD
+  { code: 'WORD_LIST', name: 'Xem từ vựng', group: 'WORD' },
+  { code: 'WORD_CREATE', name: 'Thêm từ vựng', group: 'WORD' },
+  { code: 'WORD_UPDATE', name: 'Sửa từ vựng', group: 'WORD' },
+  { code: 'WORD_DELETE', name: 'Xóa từ vựng', group: 'WORD' },
+
   // WORD_SET
   { code: 'WORD_SET_LIST', name: 'Xem bộ từ', group: 'WORD_SET' },
   { code: 'WORD_SET_CREATE', name: 'Tạo bộ từ', group: 'WORD_SET' },
