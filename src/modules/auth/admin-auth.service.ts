@@ -200,7 +200,7 @@ export class AdminAuthService {
       { EX: TTL.MEDIUM },
     );
 
-    const resetLink = `${mailConfig.clientResetPasswordUrl}?token=${resetToken}`;
+    const resetLink = `${mailConfig.adminResetPasswordUrl}?token=${resetToken}`;
     await this.mailService.queueForgotPasswordEmail({
       toEmail: admin.email,
       userName: admin.name,
