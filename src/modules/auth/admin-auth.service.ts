@@ -69,7 +69,7 @@ export class AdminAuthService {
     await this.redis.set(
       CACHE.AUTH._KEY.REFRESH_TOKEN(ActorType.ADMIN, admin.id, refreshJti),
       refreshToken,
-      { EX: TTL.VERY_LONG },
+      { EX: this.tokenService.remainingLifetime(refreshToken) },
     );
 
     return new LoginResponse({ accessToken, refreshToken });
@@ -98,20 +98,26 @@ export class AdminAuthService {
       decoded.sub,
       decoded.jti,
     );
-    const exists = await this.redis.get(oldKey);
-    if (!exists) {
+    const exists = await this.redis.getDel(oldKey);
+    if (exists !== dto.refreshToken) {
       throw new AppException(
         VOCALEARN_ERROR_CODES.AUTH.INVALID_REFRESH_TOKEN,
         HttpStatus.UNAUTHORIZED,
       );
     }
-    await this.cacheService.delete(oldKey);
 
     const admin = await this.adminRepository.findById(decoded.sub);
     if (!admin) {
       throw new AppException(
         VOCALEARN_ERROR_CODES.USER.USER_NOT_FOUND,
         HttpStatus.NOT_FOUND,
+      );
+    }
+
+    if (admin.status !== AdminStatus.ACTIVE) {
+      throw new AppException(
+        VOCALEARN_ERROR_CODES.AUTH.ACCOUNT_NOT_ACTIVE,
+        HttpStatus.FORBIDDEN,
       );
     }
 
@@ -128,7 +134,7 @@ export class AdminAuthService {
     await this.redis.set(
       CACHE.AUTH._KEY.REFRESH_TOKEN(ActorType.ADMIN, admin.id, newJti),
       newRefreshToken,
-      { EX: TTL.WEEK },
+      { EX: this.tokenService.remainingLifetime(newRefreshToken) },
     );
 
     return new RefreshTokenResponse(newAccessToken, newRefreshToken);
@@ -237,29 +243,41 @@ export class AdminAuthService {
     return true;
   }
 
-  async logout(adminId: number, accessToken: string): Promise<boolean> {
-    const decoded = this.tokenService.decode(accessToken);
-    if (!decoded.jti || !decoded.exp) {
-      throw new AppException(
-        VOCALEARN_ERROR_CODES.AUTH.INVALID_ACCESS_TOKEN,
-        HttpStatus.BAD_REQUEST,
-      );
+  async logoutCookie(
+    refreshToken?: string,
+    accessToken?: string,
+  ): Promise<boolean> {
+    if (!refreshToken) return true;
+    let decoded: JwtPayload;
+    try {
+      decoded = this.tokenService.verifyRefreshToken(refreshToken);
+    } catch {
+      return true;
     }
-    const ttlRemaining = decoded.exp - Math.floor(Date.now() / 1000);
-    if (ttlRemaining <= 0) {
-      throw new AppException(
-        VOCALEARN_ERROR_CODES.AUTH.INVALID_ACCESS_TOKEN,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-    await this.redis.set(
-      CACHE.AUTH._KEY.BLACKLIST(decoded.jti),
-      `${ActorType.ADMIN}:${adminId}`,
-      { EX: ttlRemaining },
-    );
+    if (decoded.role !== AuthRole.ADMIN || !decoded.jti) return true;
     await this.cacheService.deleteByPattern(
-      CACHE.AUTH._PATTERN.ALL_REFRESH_TOKENS(ActorType.ADMIN, adminId),
+      CACHE.AUTH._PATTERN.ALL_REFRESH_TOKENS(ActorType.ADMIN, decoded.sub),
     );
+    if (accessToken) {
+      let access: JwtPayload;
+      try {
+        access = this.tokenService.verifyAccessToken(accessToken);
+      } catch {
+        return true;
+      }
+      if (
+        access.role === decoded.role &&
+        access.sub === decoded.sub &&
+        access.jti &&
+        access.exp
+      ) {
+        const ttl = access.exp - Math.floor(Date.now() / 1000);
+        if (ttl > 0)
+          await this.redis.set(CACHE.AUTH._KEY.BLACKLIST(access.jti), 'admin', {
+            EX: ttl,
+          });
+      }
+    }
     return true;
   }
 }

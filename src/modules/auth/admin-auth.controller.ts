@@ -1,3 +1,11 @@
+import type { Request, Response } from 'express';
+import {
+  CookieOriginGuard,
+  readAuthCookie,
+  setAuthCookie,
+  clearAuthCookie,
+} from './auth-cookie';
+import { AccessTokenResponse } from './response/access-token.response';
 import {
   Controller,
   HttpStatus,
@@ -7,6 +15,7 @@ import {
   UseGuards,
   Patch,
   Req,
+  Res,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -20,13 +29,10 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { ChangeEmailDto } from './dto/change-email.dto';
-import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import type { RequestWithUser } from '../../common/types/request-with-user.type';
 import { VOCALEARN_ERROR_CODES } from '../../constants/error-code.constant';
 import { AppException } from '../../common/exceptions/app.exception';
-import { LoginResponse } from './response/login.response';
-import { RefreshTokenResponse } from './response/refresh-token.response';
 import { ActorGuard } from '../../common/guards/actor.guard';
 import { ActorType } from '../../constants/actor-type.constant';
 import { RequireActor } from '../../common/decorators/actor.decorator';
@@ -36,18 +42,29 @@ import { RequireActor } from '../../common/decorators/actor.decorator';
 export class AdminAuthController {
   constructor(private readonly adminAuthService: AdminAuthService) {}
 
+  @UseGuards(CookieOriginGuard)
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Admin login with email and password' })
   @ApiResponse({
     status: 200,
     description: 'Login successful.',
-    type: LoginResponse,
+    type: AccessTokenResponse,
   })
   @ApiResponse({ status: 401, description: 'Invalid credentials.' })
   @ApiResponse({ status: 403, description: 'Account not active.' })
-  async login(@Body() dto: LoginDto) {
-    return await this.adminAuthService.login(dto);
+  async login(
+    @Body() dto: LoginDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const result = await this.adminAuthService.login(dto);
+    setAuthCookie(
+      res,
+      'admin',
+      result.tokens.refreshToken,
+      dto.remember ?? true,
+    );
+    return { accessToken: result.tokens.accessToken };
   }
 
   @Post('forgot-password')
@@ -70,38 +87,58 @@ export class AdminAuthController {
     return await this.adminAuthService.resetPassword(dto);
   }
 
+  @UseGuards(CookieOriginGuard)
   @Post('refresh-token')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Get a new token pair using a refresh token' })
+  @ApiOperation({ summary: 'Refresh access token using the HttpOnly cookie' })
   @ApiResponse({
     status: 200,
     description: 'Token refreshed successfully.',
-    type: RefreshTokenResponse,
+    type: AccessTokenResponse,
   })
   @ApiResponse({
     status: 401,
     description: 'Invalid or expired refresh token.',
   })
-  async refreshToken(@Body() dto: RefreshTokenDto) {
-    return await this.adminAuthService.refreshToken(dto);
-  }
-
-  @UseGuards(JwtAuthGuard, ActorGuard)
-  @RequireActor(ActorType.ADMIN)
-  @Post('logout')
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Logout the authenticated admin' })
-  @ApiResponse({ status: 201, description: 'Logout successful.' })
-  @ApiResponse({ status: 401, description: 'Invalid or missing access token.' })
-  async logout(@Req() req: RequestWithUser) {
-    const accessToken = req.headers.authorization?.split(' ')[1];
-    if (!accessToken) {
+  async refreshToken(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const cookie = readAuthCookie(req, 'admin');
+    if (!cookie) {
+      clearAuthCookie(res, 'admin');
       throw new AppException(
-        VOCALEARN_ERROR_CODES.AUTH.INVALID_ACCESS_TOKEN,
+        VOCALEARN_ERROR_CODES.AUTH.INVALID_REFRESH_TOKEN,
         HttpStatus.UNAUTHORIZED,
       );
     }
-    return await this.adminAuthService.logout(req.user.id, accessToken);
+    try {
+      const result = await this.adminAuthService.refreshToken({
+        refreshToken: cookie.token,
+      });
+      setAuthCookie(res, 'admin', result.refreshToken, cookie.remember);
+      return { accessToken: result.accessToken };
+    } catch (error) {
+      if (
+        error instanceof AppException &&
+        [401, 403, 404].includes(error.getStatus())
+      )
+        clearAuthCookie(res, 'admin');
+      throw error;
+    }
+  }
+
+  @UseGuards(CookieOriginGuard)
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Revoke the cookie session and clear its cookie' })
+  async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    await this.adminAuthService.logoutCookie(
+      readAuthCookie(req, 'admin')?.token,
+      req.headers.authorization?.split(' ')[1],
+    );
+    clearAuthCookie(res, 'admin');
+    return true;
   }
 
   @UseGuards(JwtAuthGuard, ActorGuard)

@@ -1,5 +1,7 @@
 import {
   IsEmail,
+  IsBoolean,
+  IsOptional,
   IsNotEmpty,
   IsStrongPassword,
   MaxLength,
@@ -11,6 +13,10 @@ import { VOCALEARN_ERROR_CODES } from '../../../constants/error-code.constant';
 const { USER } = VOCALEARN_ERROR_CODES;
 
 export class LoginDto {
+  @ApiProperty({ required: false, default: true })
+  @IsOptional()
+  @IsBoolean()
+  remember?: boolean;
   @ApiProperty({ example: 'cuongvudev2911@gmail.com' })
   @IsEmail({}, { message: USER.EMAIL_INVALID })
   @IsNotEmpty({ message: USER.EMAIL_REQUIRED })

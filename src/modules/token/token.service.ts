@@ -48,4 +48,9 @@ export class TokenService {
   decode(token: string): JwtPayload {
     return this.jwtService.decode<JwtPayload>(token);
   }
+  remainingLifetime(token: string): number {
+    const exp = this.decode(token).exp;
+    if (!exp) throw new Error('Token expiration is required');
+    return Math.max(1, exp - Math.floor(Date.now() / 1000));
+  }
 }

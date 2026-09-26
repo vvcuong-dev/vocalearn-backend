@@ -467,3 +467,17 @@ docker compose down -v        # stop and wipe volumes (reset data)
 ## 📄 License
 
 UNLICENSED
+
+## Browser authentication cookies
+
+Login (`POST /api/auth/login` and `/api/admin/auth/login`) accepts `{ email, password, remember? }` and returns only `{ accessToken }` inside the existing response envelope. Refresh credentials are set as HttpOnly cookies, separately named `vocalearn_user_refresh` and `vocalearn_admin_refresh`, scoped to `/api/auth` and `/api/admin/auth` respectively.
+
+`POST .../refresh-token` reads the refresh cookie, rotates it and returns `{ accessToken }`. It does not accept a refresh token from the request body. `POST .../logout` revokes the cookie session and clears the cookie, including when the access token has expired. Existing logout semantics revoke all refresh sessions for that account; admin and user credentials remain separate.
+
+Browser calls to login, refresh and logout must send credentials and `X-CSRF-Protection: 1`. The auth guard rejects foreign origins not listed in `CORS_ORIGINS`; the custom header requires a browser CORS preflight. Never configure a wildcard credentialed origin. Example local origins: `http://localhost:5173,http://127.0.0.1:5173`. Use the same hostname for FE and API when developing.
+
+`AUTH_COOKIE_SAME_SITE` defaults to `lax`. `AUTH_COOKIE_SECURE=true` enables HTTPS-only cookies; production always enables Secure. `SameSite=none` requires Secure. No Domain attribute is set (host-only cookie). Cookie expiration and Redis token TTL follow `JWT_REFRESH_EXPIRES_IN`; `remember=false` uses a session cookie, and refresh preserves this preference. Responses containing credentials use `Cache-Control: no-store`.
+
+Restart both applications after this change. Old browser-storage sessions require one new login. For cross-site deployment, use HTTPS, explicit allowed origins and `SameSite=none`; third-party cookie restrictions may still require a same-site deployment.
+
+Focused verification: `pnpm exec jest --config test/jest-e2e.json --runInBand auth-cookie.e2e-spec.ts auth-cookie-service.e2e-spec.ts jwt-auth-guard.e2e-spec.ts`. HTTP tests mock auth services; service tests mock database and Redis dependencies. No live database or Redis is required.
