@@ -73,11 +73,29 @@ describe('HttpOnly auth cookies', () => {
     await app.close();
   });
 
+  it('upgrades a legacy user session cookie to a persistent plain-token cookie', async () => {
+    const res = await request(app.getHttpServer() as Server)
+      .post('/api/auth/refresh-token')
+      .set('X-CSRF-Protection', '1')
+      .set(
+        'Cookie',
+        `vocalearn_user_refresh=${encodeURIComponent(`0:${token}`)}`,
+      )
+      .expect(200);
+    expect(services.user.refreshToken).toHaveBeenCalledWith({
+      refreshToken: token,
+    });
+    expect(res.headers['set-cookie'][0]).toContain(
+      `vocalearn_user_refresh=${token};`,
+    );
+    expect(res.headers['set-cookie'][0]).toContain('Expires=');
+  });
+
   for (const actor of ['admin', 'user'] as const) {
     const base = actor === 'admin' ? '/api/admin/auth' : '/api/auth';
     const cookie = (remember = '1') =>
-      `vocalearn_${actor}_refresh=${encodeURIComponent(`${remember}:${token}`)}`;
-    it(`${actor} production login uses Secure and supports a session cookie`, async () => {
+      `vocalearn_${actor}_refresh=${encodeURIComponent(actor === 'user' ? token : `${remember}:${token}`)}`;
+    it(`${actor} production login uses Secure and the actor persistence policy`, async () => {
       const original = process.env.NODE_ENV;
       process.env.NODE_ENV = 'production';
       try {
@@ -92,7 +110,14 @@ describe('HttpOnly auth cookies', () => {
           .expect(200);
         expect(res.headers['set-cookie'][0]).toContain('; Secure');
         expect(res.headers['set-cookie'][0]).toContain('; HttpOnly');
-        expect(res.headers['set-cookie'][0]).not.toContain('Expires=');
+        if (actor === 'user') {
+          expect(res.headers['set-cookie'][0]).toContain('Expires=');
+          expect(res.headers['set-cookie'][0]).toContain(
+            `vocalearn_user_refresh=${token};`,
+          );
+        } else {
+          expect(res.headers['set-cookie'][0]).not.toContain('Expires=');
+        }
       } finally {
         if (original === undefined) delete process.env.NODE_ENV;
         else process.env.NODE_ENV = original;
@@ -118,7 +143,7 @@ describe('HttpOnly auth cookies', () => {
       expect(res.headers['cache-control']).toBe('no-store');
       expect(res.headers['access-control-allow-credentials']).toBe('true');
     });
-    it(`${actor} refresh reads only its cookie and preserves session-cookie lifetime`, async () => {
+    it(`${actor} refresh reads only its cookie and preserves the actor persistence policy`, async () => {
       const res = await request(app.getHttpServer() as Server)
         .post(`${base}/refresh-token`)
         .set('X-CSRF-Protection', '1')
@@ -128,7 +153,9 @@ describe('HttpOnly auth cookies', () => {
         refreshToken: token,
       });
       expect(res.body).toEqual({ accessToken: 'renewed' });
-      expect(res.headers['set-cookie'][0]).not.toContain('Expires=');
+      expect(res.headers['set-cookie'][0].includes('Expires=')).toBe(
+        actor === 'user',
+      );
       expect(res.headers['set-cookie'][0]).not.toContain('Max-Age=');
     });
     it(`${actor} ignores refresh tokens in JSON and cookies for the other actor`, async () => {

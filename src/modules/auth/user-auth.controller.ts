@@ -73,12 +73,7 @@ export class UserAuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const result = await this.userAuthService.login(dto);
-    setAuthCookie(
-      res,
-      'user',
-      result.tokens.refreshToken,
-      dto.remember ?? true,
-    );
+    setAuthCookie(res, 'user', result.tokens.refreshToken);
     return { accessToken: result.tokens.accessToken };
   }
 
@@ -131,7 +126,7 @@ export class UserAuthController {
       const result = await this.userAuthService.refreshToken({
         refreshToken: cookie.token,
       });
-      setAuthCookie(res, 'user', result.refreshToken, cookie.remember);
+      setAuthCookie(res, 'user', result.refreshToken);
       return { accessToken: result.accessToken };
     } catch (error) {
       if (

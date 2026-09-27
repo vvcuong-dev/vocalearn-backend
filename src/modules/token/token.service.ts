@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { GeneratedToken, JwtPayload } from '../auth/type/jwt-payload.type';
+import {
+  AuthRole,
+  GeneratedToken,
+  JwtPayload,
+} from '../auth/type/jwt-payload.type';
 import { jwtConfig } from '../../configs/jwt.config';
 import { randomUUID } from 'crypto';
 
@@ -27,7 +31,8 @@ export class TokenService {
       { ...payload, jti },
       {
         secret: jwtConfig.refreshSecret,
-        expiresIn: jwtConfig.refreshExpiresIn,
+        expiresIn:
+          payload.role === AuthRole.USER ? '30d' : jwtConfig.refreshExpiresIn,
       },
     );
     return { token, jti };

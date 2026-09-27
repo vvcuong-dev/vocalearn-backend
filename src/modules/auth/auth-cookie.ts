@@ -35,16 +35,22 @@ export function setAuthCookie(
   res: Response,
   actor: CookieActor,
   token: string,
-  remember: boolean,
+  remember = true,
 ) {
   const payload = decode(token);
   if (!payload || typeof payload === 'string' || !payload.exp)
     throw new Error('Refresh token has no expiration');
   res.setHeader('Cache-Control', 'no-store');
-  res.cookie(cookieName(actor), `${remember ? '1' : '0'}:${token}`, {
-    ...options(actor),
-    ...(remember ? { expires: new Date(payload.exp * 1000) } : {}),
-  });
+  res.cookie(
+    cookieName(actor),
+    actor === 'user' ? token : `${remember ? '1' : '0'}:${token}`,
+    {
+      ...options(actor),
+      ...(actor === 'user' || remember
+        ? { expires: new Date(payload.exp * 1000) }
+        : {}),
+    },
+  );
 }
 export function readAuthCookie(
   req: Request,
@@ -58,6 +64,11 @@ export function readAuthCookie(
   if (!raw) return;
   try {
     const value = decodeURIComponent(raw.slice(prefix.length));
+    if (actor === 'user') {
+      // Accept the previous cookie format until existing sessions expire.
+      const token = /^[01]:/.test(value) ? value.slice(2) : value;
+      return token ? { token, remember: true } : undefined;
+    }
     if (!/^[01]:.+$/.test(value)) return;
     return { token: value.slice(2), remember: value.startsWith('1:') };
   } catch {
