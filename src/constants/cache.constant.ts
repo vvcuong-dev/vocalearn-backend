@@ -18,6 +18,13 @@ export const TTL = {
 // Manage cache keys with a consistent prefix and versioning
 
 export const CACHE = {
+  RATE_LIMIT: {
+    _VER: 'v1',
+    _KEY: {
+      BY_IP: (ip: string) =>
+        `${PREFIX}:${GLOBAL_VER}:rate_limit:${CACHE.RATE_LIMIT._VER}:ip_${ip}`,
+    },
+  },
   AUTH: {
     _VER: 'v1',
     _KEY: {

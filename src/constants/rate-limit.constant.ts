@@ -1,0 +1,6 @@
+export const RATE_LIMIT = {
+  WINDOW_S: 60,
+  MAX_REQUESTS: 10,
+  PENALTY_THRESHOLD: 20,
+  PENALTY_S: 300,
+} as const;

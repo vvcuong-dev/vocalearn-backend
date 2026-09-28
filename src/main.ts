@@ -30,10 +30,23 @@ async function bootstrap() {
     .setDescription('API documentation for the VocaLearn backend')
     .setVersion('1.0')
     .addBearerAuth()
+    .addGlobalParameters({
+      name: 'X-CSRF-Protection',
+      in: 'header',
+      required: true,
+      schema: { type: 'string', default: '1' },
+    })
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, document);
+  SwaggerModule.setup('api/docs', app, document, {
+    swaggerOptions: {
+      requestInterceptor: (request: { headers: Record<string, string> }) => {
+        request.headers['X-CSRF-Protection'] = '1';
+        return request;
+      },
+    },
+  });
 
   app.useGlobalPipes(
     new ValidationPipe({
