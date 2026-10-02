@@ -1,5 +1,6 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
-import { RateLimitMiddleware } from './common/middlewares/rate-limit.middleware';
+import { Module } from '@nestjs/common';
+// import { MiddlewareConsumer, NestModule } from '@nestjs/common';
+// import { RateLimitMiddleware } from './common/middlewares/rate-limit.middleware';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
@@ -22,6 +23,7 @@ import { WordSetModule } from './modules/word-set/word-set.module';
 import { FolderModule } from './modules/folder/folder.module';
 import { MeModule } from './modules/me/me.module';
 import { WordModule } from './modules/word/word.module';
+import { DictionaryModule } from './modules/dictionary/dictionary.module';
 
 @Module({
   imports: [
@@ -51,12 +53,13 @@ import { WordModule } from './modules/word/word.module';
     FolderModule,
     MeModule,
     WordModule,
+    DictionaryModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(RateLimitMiddleware).forRoutes('{*path}');
-  }
+export class AppModule /* implements NestModule */ {
+  // configure(consumer: MiddlewareConsumer) {
+  //   consumer.apply(RateLimitMiddleware).forRoutes('{*path}');
+  // }
 }

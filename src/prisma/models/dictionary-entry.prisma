@@ -1,0 +1,12 @@
+model DictionaryEntry {
+  id           Int       @id @default(autoincrement())
+  term         String    @unique
+  phonetic     String?
+  partOfSpeech WordType?
+  meaning      String?   @db.Text
+  example      String?   @db.Text
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("dictionary_entries")
+}
