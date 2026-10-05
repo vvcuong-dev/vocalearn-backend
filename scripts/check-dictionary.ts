@@ -32,6 +32,23 @@ async function main() {
       rows.every((row) => String(row.term).toLowerCase().startsWith('he')),
     );
     assert(rows.every((row) => Object.hasOwn(row, 'example')));
+    assert(rows.every((row) => !String(row.term).includes(' ')));
+    const lookup = await fetch(`${base}/api/dictionary/lookup?q=hello`);
+    assert.equal(lookup.status, 200);
+    const hello = (await lookup.json()) as {
+      term: string;
+      phonetic: string;
+      audioUrl: string;
+      audioSourceUrl: string;
+    };
+    assert.equal(hello.term.toLowerCase(), 'hello');
+    assert(hello.phonetic);
+    assert(hello.audioUrl.startsWith('https://commons.wikimedia.org/'));
+    assert(hello.audioSourceUrl.includes('/File:'));
+    const absent = await fetch(
+      `${base}/api/dictionary/lookup?q=zzzz_not_a_real_word_123`,
+    );
+    assert.equal(await absent.text(), ''); // Nest sends an empty body for null without the app response interceptor.
     const empty = await fetch(`${base}/api/dictionary/suggest?q=%20`);
     assert.equal(empty.status, 400);
     const missing = await fetch(`${base}/api/dictionary/suggest`);

@@ -1,0 +1,8 @@
+{
+  "extractUrl": "https://kaikki.org/dictionary/downloads/vi/vi-extract.jsonl.gz",
+  "extractPath": "../.firecrawl/vi-extract.jsonl.gz",
+  "pronunciationsPath": "src/modules/dictionary/data/pronunciations.json",
+  "audioHosts": ["commons.wikimedia.org", "upload.wikimedia.org"],
+  "audioSourceBaseUrl": "https://commons.wikimedia.org/wiki/File:",
+  "maxAudioUrlLength": 191
+}

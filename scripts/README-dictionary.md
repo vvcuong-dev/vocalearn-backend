@@ -1,5 +1,23 @@
 # Skypedia dictionary import
 
+## Independent field suggestions and pronunciation files
+
+`GET /dictionary/suggest?q=he` returns word prefixes; multiword terms are excluded
+until the query contains a space. `GET /dictionary/lookup?q=hello` looks up the
+exact term and returns the saved meaning/example/IPA plus `audioUrl` and
+`audioSourceUrl` when available. It returns null if the term is absent.
+The frontend selects each field independently and stores selected audio in the
+existing Word.audioUrl column. The dictionary still has one meaning/example per term.
+
+Run `python scripts/build-pronunciations.py` to rebuild
+`src/modules/dictionary/data/pronunciations.json` from the existing local Kaikki
+extract. The catalog has 9,373 English terms with audio; TypeScript imports and
+emits it beside the compiled service via resolveJsonModule, including watch mode.
+Skypedia IPA takes precedence, with Kaikki IPA used only as a fallback.
+Files are streamed from Wikimedia Commons rather than bundled or synthesized.
+The corresponding Commons file page supplies author and license information.
+Not every word has audio, and upstream files require an internet connection.
+
 From `vocalearn-backend`:
 
 ```powershell
